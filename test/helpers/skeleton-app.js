@@ -76,7 +76,6 @@ class WatchedBuild extends EventEmitter {
       if (output.includes('Build successful')) {
         this.emit('did-rebuild');
       }
-
       debug(output);
     });
   }

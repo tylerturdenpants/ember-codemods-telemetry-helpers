@@ -1,5 +1,5 @@
-const execa = require('execa');
-const path = require('path');
+// const execa = require('execa');
+// const path = require('path');
 const SkeletonApp = require('../helpers/skeleton-app');
 
 module.exports = async function startApp(appPath) {

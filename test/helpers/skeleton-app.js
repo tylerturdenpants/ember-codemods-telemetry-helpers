@@ -25,8 +25,8 @@ module.exports = class SkeletonApp {
     });
     this.classicAppDir = path.resolve(appPath);
     this.root = this.tmpDir.name;
-    fs.copySync(this.classicAppDir, this.root);
     this.execOpts = { cwd: this.root, stderr: 'inherit' };
+    fs.copySync(this.classicAppDir, this.root);
   }
 
   serve() {
@@ -36,14 +36,7 @@ module.exports = class SkeletonApp {
     return (this.watched = new WatchedBuild(this._ember(['serve', '--port', `${this.port}`])));
   }
 
-  updatePackageJSON(callback) {
-    let pkgPath = `${this.root}/package.json`;
-    let pkg = fs.readJSONSync(pkgPath);
-    fs.writeJSONSync(pkgPath, callback(pkg) || pkg, { spaces: 2 });
-  }
-
   teardown(signal) {
-    console.log(signal);
     if (this.watched) {
       this.watched.kill(signal, {
         forceKillAfterTimeout: 2000,
@@ -52,17 +45,13 @@ module.exports = class SkeletonApp {
     this.tmpDir.removeCallback();
   }
 
-  async cleanNodeModules() {
-    await execa('rm', ['-rf', 'node_modules'], this.execOpts);
-  }
-
   async install() {
-    await execa('yarn', ['install'], { cwd: this.root });
+    await execa('yarn', ['install'], this.execOpts);
   }
 
   _ember(args) {
     let ember = require.resolve('ember-cli/bin/ember');
-    return execa.node(ember, args, { cwd: this.root });
+    return execa.node(ember, args, this.execOpts);
   }
 };
 
@@ -76,6 +65,7 @@ class WatchedBuild extends EventEmitter {
       if (output.includes('Build successful')) {
         this.emit('did-rebuild');
       }
+
       debug(output);
     });
   }
